@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phuket Unveiled: Ethical Family Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Seasons: Report Info (Dry vs Monsoon characteristics, costs, crowds) -> Goal (Compare seasons) -> Viz (Bar Chart - Chart.js: Popularity/Crowds, Weather Predictability, Cost Level) -> Interaction (Static display) -> Justification (Quick visual summary of trade-offs) -> Library (Chart.js).
+        - Transport Costs: Report Info (Taxi, Bolt, Bus costs for various routes) -> Goal (Compare options) -> Viz (Styled HTML Table/List) -> Interaction (Static display) -> Justification (Clear cost breakdown) -> Method (HTML/Tailwind).
+        - Elephant Sanctuaries: Report Info (Names, ethical practices, activities, costs) -> Goal (Inform & Compare ethical options) -> Viz (Cards with key details, "Key Ethical Principles" list) -> Interaction (Static cards) -> Justification (Easy comparison, highlights ethics) -> Method (HTML/Tailwind).
+        - Island Trips: Report Info (Names, activities, travel time, cost, suitability) -> Goal (Explore options) -> Viz (Filterable Cards for Day/Overnight) -> Interaction (Buttons to filter, static cards) -> Justification (Easy browsing of many options) -> Method (HTML/Tailwind, JS for filtering).
+        - Currency Converter: Report Info (THB to AED conversion, standard amounts) -> Goal (Provide live conversion and quick reference) -> Viz (Input field, display, table) -> Interaction (Live input conversion, API fetch) -> Justification (Practical tool for financial planning) -> Library (Vanilla JS, Fetch API).
+        - NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .bg-warm-neutral-light { background-color: #fdfaf6; }
+        .bg-warm-neutral-medium { background-color: #f4ece2; }
+        .text-warm-neutral-dark { color: #5c554d; }
+        .text-seafoam-accent { color: #5ca9a7; }
+        .bg-seafoam-accent { background-color: #5ca9a7; }
+        .border-seafoam-accent { border-color: #5ca9a7; }
+        .hover-bg-seafoam-dark:hover { background-color: #4a8a88; }
+        .active-nav { color: #5ca9a7; border-bottom: 2px solid #5ca9a7; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; max-height: 400px;} }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-button.open + .accordion-content { max-height: 1000px; } /* Adjust max-height as needed */
+        .section-intro { font-size: 1.125rem; line-height: 1.75rem; color: #71717a; margin-bottom: 1.5rem; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #5ca9a7; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-warm-neutral-light text-warm-neutral-dark">
+
+    <header class="bg-warm-neutral-medium shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-2xl font-bold text-seafoam-accent">Phuket Ethical Family Guide</h1>
+                <nav class="hidden md:flex space-x-4">
+                    <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-seafoam-accent">🏠 Home</a>
+                    <a href="#planning" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-seafoam-accent">📝 Plan Your Trip</a>
+                    <a href="#ethical-encounters" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-seafoam-accent">🐘 Ethical Encounters</a>
+                    <a href="#island-adventures" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-seafoam-accent">🏝️ Island Adventures</a>
+                    <a href="#summary" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-seafoam-accent">📋 Summary</a>
+                </nav>
+                <button id="mobile-menu-button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-warm-neutral-dark hover:text-seafoam-accent hover:bg-warm-neutral-light focus:outline-none focus:ring-2 focus:ring-inset focus:ring-seafoam-accent" aria-controls="mobile-menu" aria-expanded="false">
+                    <span classs="sr-only">Open main menu</span>
+                    <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="md:hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-seafoam-accent hover:bg-warm-neutral-light">🏠 Home</a>
+                <a href="#planning" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-seafoam-accent hover:bg-warm-neutral-light">📝 Plan Your Trip</a>
+                <a href="#ethical-encounters" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-seafoam-accent hover:bg-warm-neutral-light">🐘 Ethical Encounters</a>
+                <a href="#island-adventures" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-seafoam-accent hover:bg-warm-neutral-light">🏝️ Island Adventures</a>
+                <a href="#summary" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-seafoam-accent hover:bg-warm-neutral-light">📋 Summary</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <section id="home" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-center text-seafoam-accent">Welcome to Phuket!</h2>
+            <p class="section-intro text-center max-w-3xl mx-auto">
+                Discover Phuket, a stunning Thai island perfect for families seeking memorable and ethical travel experiences. This guide helps you navigate its beautiful landscapes, vibrant culture, and responsible wildlife encounters, ensuring a vacation that aligns with your values.
+            </p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-warm-neutral-dark">Why Phuket for Families?</h3>
+                    <p class="mb-4">Phuket offers a diverse range of activities, from tranquil beaches like <a href="https://www.keemala.com/about-kamala-beach-phuket-thailand/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Kamala Beach</a>, ideal for relaxation and water sports, to engaging cultural sites. Kamala Beach, with its calm waters and family-friendly amenities, provides a quieter alternative to busier spots, making it a great base for your adventures.</p>
+                    <p class="mb-4">The island's well-developed tourism infrastructure caters to all ages, allowing you to craft a balanced itinerary of excitement and serenity. This guide emphasizes ethical tourism, helping you make choices that support animal welfare and conservation.</p>
+                </div>
+                <div class="rounded-lg overflow-hidden shadow-xl">
+                    <img src="https://content.phuket101.net/wp-content/uploads/20210707213415/kamala-beach-phuket-1-1.jpg" alt="Kamala Beach, Phuket" class="w-full h-auto object-cover">
+                </div>
+            </div>
+        </section>
+
+        <section id="planning" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-center text-seafoam-accent">📝 Plan Your Phuket Adventure</h2>
+            <p class="section-intro text-center max-w-3xl mx-auto">
+                Effective planning is key to a wonderful family vacation. This section covers essential logistics: the best times to visit, getting around safely, staying connected, managing finances, packing smart, health, safety, and local customs like tipping. Use these tips to prepare for a smooth and enjoyable trip.
+            </p>
+            
+            <div class="space-y-6">
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center" id="currency-converter-accordion-button">
+                        Live Currency Converter (THB to AED) 💱
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <div id="converter-loading" class="text-center text-gray-500 mb-4 hidden">
+                            <span class="spinner mr-2"></span>Fetching latest rates...
+                        </div>
+                        <div id="converter-error" class="text-red-500 text-center mb-4 hidden">
+                            Failed to load exchange rates. Please try again later.
+                        </div>
+                        <div id="converter-content" class="hidden">
+                            <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4">
+                                <label for="input-currency" class="font-medium">Amount in THB:</label>
+                                <input type="number" id="input-currency" class="flex-grow p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-seafoam-accent" placeholder="e.g., 1000" min="0">
+                                <span class="font-medium text-lg">=</span>
+                                <span id="output-currency" class="flex-grow p-2 bg-gray-100 border border-gray-300 rounded-md text-right font-bold">0.00 AED</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">Current rate: 1 THB = <span id="thb-aed-rate" class="font-semibold">N/A</span> AED</p>
+
+                            <h5 class="font-semibold mb-2 text-md">Standard Conversions (THB to AED):</h5>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-700 bg-gray-50">THB</th>
+                                            <th class="py-2 px-4 border-b text-left text-sm font-medium text-gray-700 bg-gray-50">AED</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="standard-conversions-table-body">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Best Time to Visit ☀️🌧️
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <p class="mb-2">Phuket has two main seasons:</p>
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Dry Season (November - April):</strong> Sunny, calm seas, ideal for beaches and island hopping. Peak tourist time (Dec-Jan) means higher prices and more crowds.</li>
+                            <li><strong>Monsoon Season (May - October):</strong> Some rain, but fewer crowds and lower prices. Seas can be rough, but some tours like Phang Nga Bay are still great. July is often rainier than June.</li>
+                        </ul>
+                        <p class="mb-4">Consider your priorities: budget vs. guaranteed good weather. The chart below offers a quick visual comparison.</p>
+                        <div class="chart-container bg-white p-4 rounded-lg shadow-md">
+                            <canvas id="seasonsChart"></canvas>
+                        </div>
+                        <p class="mt-4 text-sm">The chart visually summarizes trade-offs: "Popularity/Crowds" (1=Low, 5=High), "Weather Predictability" (1=Low, 5=High), and "Cost Level" (1=Low, 5=High) for each season to help you decide.</p>
+                    </div>
+                </div>
+
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Getting Around Phuket 🚕🚌
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <h4 class="font-semibold mb-2 text-lg">Airport Transfers to Kamala:</h4>
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Taxis/Bolt/Grab:</strong> A taxi from <a href="https://phuket.airportthai.co.th/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phuket International Airport (HKT)</a> to Kamala Beach typically costs between 700-900 THB and takes approximately 30 minutes. <a href="https://play.google.com/store/search?q=bolt+thailand&c=apps" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Bolt</a> offers competitive rates; for a comparable distance (Kamala Beach to Rassada Pier), a standard car might cost around 459 THB, while a 6-seater van suitable for a family of four could be approximately 661.80 THB.</li>
+                            <li><strong>Shared Minivans:</strong> A more budget-friendly option, these typically cost 200-300 THB per person and take about 55 minutes.</li>
+                            <li><strong>Public Bus:</strong> The most economical choice, costing around 100 THB and taking approximately one hour, with buses departing roughly once an hour.</li>
+                            <li><strong>Private Transfers:</strong> Companies such as <a href="https://www.sixt.com/car-rental/thailand/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">SIXT</a> offer a range of vehicles, including sedans, SUVs, multi-seaters, and vans, with options for child seats and GPS, providing comfort and safety for families.</li>
+                        </ul>
+                        <h4 class="font-semibold mb-2 text-lg">Local Transport from Kamala:</h4>
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Tuk-tuks:</strong> These iconic vehicles are widely available but can be expensive for short distances (starting from 200 THB) and require fare negotiation before boarding.</li>
+                            <li><strong>Moto Taxis:</strong> While the cheapest option for short trips (50-100 THB), they are significantly less safe and unsuitable for families, especially with children.</li>
+                            <li><strong>Grab/Bolt/inDrive:</strong> These ride-hailing apps are recommended for longer distances due to their transparent pricing and various vehicle types.
+                                <ul class="list-circle list-inside ml-4">
+                                    <li>From Kamala Beach to Chalong Pier: A <a href="https://play.google.com/store/search?q=bolt+thailand&c=apps" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Bolt</a> standard car might cost around 459 THB, while a traditional taxi could range from 550-700 THB.</li>
+                                    <li>To <a href="https://www.rome2rio.com/s/Kamala-Beach/Phuket-Old-Town" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phuket Old Town</a>: A taxi/<a href="https://play.google.com/store/search?q=grab+thailand&c=apps" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Grab</a> typically costs 500-650 THB. A more economical alternative is the local Blue Songtaews (bus) at 40 THB, though the journey takes about 1 hour and 5 minutes.</li>
+                                    <li>To <a href="https://northabroad.com/phuket-big-buddha-guide/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Big Buddha</a>: A taxi/<a href="https://play.google.com/store/search?q=grab+thailand&c=apps" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Grab</a> is estimated at 460-550 THB.</li>
+                                    <li>To <a href="https://www.thavornpalmbeach.com/tips-wat-chalong-phuket" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Wat Chalong</a>: A <a href="https://play.google.com/store/search?q=bolt+thailand&c=apps" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Bolt</a> standard car is approximately 413.30 THB, while a taxi might cost 550-700 THB.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Car Rental:</strong> Available from Phuket International Airport through companies like <a href="https://www.sixt.com/car-rental/thailand/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">SIXT</a>, <a href="https://www.avis.co.th/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Avis</a>, <a href="https://www.hertz.com/rentacar/location/index.jsp?targetPage=locationDetailsView.jsp&countryCode=TH&cityCode=Phuket" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Hertz</a>, <a href="https://www.budget.co.th/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Budget</a>, and <a href="https://www.thairentacar.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Thai Rent a Car</a>. Child seats are available upon request, and the minimum age for rental is 18 with a valid license. Renting a car offers significant flexibility for exploring the island at one's own pace.</li>
+                            <li><strong>Scooter Rental:</strong> Despite its popularity, renting a scooter is **strongly discouraged for families** due to substantial safety risks. Reports indicate numerous accidents involving motorbikes. Furthermore, police may enforce the requirement for an international motorcycle license, leading to fines for tourists who lack one.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Staying Connected 📱📶
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <p class="mb-2">Easy to stay connected, with both physical SIM cards and eSIMs readily available for tourists.</p>
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Where to Buy:</strong> Physical SIM cards can be purchased at the airport, convenience stores (such as 7-Eleven), and official mobile carrier stores. eSIMs, being digital, can be purchased online and offer instant installation.</li>
+                            <li><strong>Providers:</strong> The main mobile network operators in Thailand are AIS, dtac, and TrueMove H. AIS is noted for offering the best 5G coverage and fastest internet speeds.</li>
+                            <li><strong>Cost Examples:</strong> An 8-day dtac unlimited data plan costs approximately $13 USD, and an AIS 15GB plan for 7 days can be found for as low as $6.09 USD when purchased through platforms like <a href="https://th.trip.com/guide/phone/thailand-sim-card.html" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Trip.com</a>.</li>
+                        </ul>
+                        <p>This robust connectivity allows families to rely heavily on mobile services for navigation, communication, and booking activities.</p>
+                    </div>
+                </div>
+
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Managing Finances 💰💳
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Currency:</strong> The official currency is the Thai Baht (THB).</li>
+                            <li><strong>Credit/Debit Card Acceptance:</strong> Major credit and debit cards, including Visa, MasterCard, and American Express, are widely accepted in larger businesses, hotels, and restaurants across Phuket. However, smaller shops, street vendors, and local cafes often prefer or exclusively accept cash payments.</li>
+                            <li><strong>Card Use Tips:</strong>
+                                <ul class="list-circle list-inside ml-4">
+                                    <li><strong>Inform Your Bank:</strong> Always notify your home bank about your travel plans to Thailand before your trip. This prevents your card from being blocked by anti-fraud software.</li>
+                                    <li><strong>Dynamic Currency Conversion (DCC): ALWAYS choose to pay in THB</strong> when presented with the option, as DCC often results in unfavorable exchange rates and hidden fees.</li>
+                                </ul>
+                            </li>
+                            <li><strong>ATMs:</strong> ATMs are readily available throughout Phuket.
+                                <ul class="list-circle list-inside ml-4">
+                                    <li><strong>Fees:</strong> Most local Thai banks charge a fixed fee per withdrawal, typically ranging from 150-250 THB (approximately $4.50-$7.50 USD). Your home bank may also impose its own international transaction fees.</li>
+                                    <li><strong>Limits:</strong> Most Thai ATMs have a maximum withdrawal limit per transaction, usually between 20,000 THB and 30,000 THB.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Recommendation:</strong> To minimize foreign transaction and ATM withdrawal fees, consider using a multi-currency card (such as <a href="https://wise.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Wise</a> or <a href="https://www.you.co/sg/blog/thailand-atm-withdrawal-guide/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">YouTrip</a>) or a dedicated forex card.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Packing Smart 🧳👒
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <p class="mb-2">Pack for hot, humid weather and diverse activities:</p>
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Clothing:</strong> Phuket maintains a hot and humid climate year-round, making light, loose, and breathable fabrics like cotton and linen ideal. Essential items include swimsuits for everyone, comfortable shorts, T-shirts, and tank tops.</li>
+                            <li><strong>Modest Attire:</strong> When visiting temples and other religious sites, it is important to dress modestly, covering shoulders and knees.</li>
+                            <li><strong>Rain Gear:</strong> Given the potential for rain, particularly during the monsoon season (May to October), a lightweight, waterproof jacket or poncho and a foldable umbrella are highly recommended.</li>
+                            <li><strong>Footwear:</strong> Comfortable walking shoes are essential for exploring towns, markets, and temples. For outdoor activities and boat trips where feet may get wet, waterproof shoes or sandals are advisable.</li>
+                            <li><strong>Sun Protection:</strong> The tropical sun in Phuket can be very strong. Hats, sunglasses, and high SPF sunscreen are crucial for protecting against sunburn and heat.</li>
+                            <li><strong>Beach & Island:</strong> Pack beach towels, a spacious beach bag, and beach toys for children. While snorkeling gear may be provided by tour operators, bringing personal gear can be a good idea. Beach shoes or aqua socks are also beneficial for navigating various island terrains.</li>
+                            <li><strong>Other:</strong> Insect repellent is necessary for outdoor activities, especially in jungle areas. A portable charger for electronics, a reusable water bottle to stay hydrated, and a basic first aid kit are also highly recommended. Always keep passports and travel insurance information readily accessible.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Health & Safety First 🩹⚕️
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Beach Safety:</strong> Always swim in designated areas that are patrolled by lifeguards. Be vigilant about strong currents, especially during the monsoon season, and always observe warning flags (a red flag indicates very dangerous conditions, while yellow advises caution). Constant adult supervision of children near water, even along the shoreline, is crucial. Tri Trang Beach is sometimes noted as a calmer option during periods of rough seas.</li>
+                            <li><strong>Traffic Safety:</strong> Exercise extreme caution when crossing streets or walking near traffic. It is **strongly advised against renting motorcycles or scooters for families**, particularly with children, due to the high accident rates reported and potential legal issues related to international driving permits.</li>
+                            <li><strong>Food Safety:</strong> Stick to bottled water for drinking, as tap water in Phuket may contain harmful bacteria. Ensure that all meat, seafood, and eggs are thoroughly cooked. When enjoying street food, choose vendors who operate in clean environments and have a steady stream of customers, as this often indicates freshness and good hygiene. Always wash and peel fruits and vegetables before consumption. Carrying hand sanitizer and avoiding ice in drinks are also recommended precautions.</li>
+                            <li><strong>Petty Crime:</strong> Be vigilant in crowded areas, such as markets and tourist hotspots. Keep a close eye on belongings and be aware of your surroundings to prevent pickpocketing and theft.</li>
+                            <li><strong>Tourist Scams:</strong> Be cautious of unsolicited offers for tours or services, especially those that appear "too good to be true".</li>
+                            <li><strong>Medical Services:</strong> Phuket is equipped with international standard hospitals, including <a href="https://www.bumrungrad.com/en/our-locations/phuket" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Bumrungrad International Hospital</a> and <a href="https://www.bangkokhospital.com/en/hospital/phuket" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Bangkok Hospital Phuket</a>. <a href="https://www.citycarephuket.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Citycare Phuket</a> is a medical clinic located in Kamala, offering various services.</li>
+                            <li><strong>Emergency Numbers:</strong> Tourist Police Volunteers: 115, Police (General Emergency Call): 191, Ambulance & Rescue: 1554, Medical Emergency Call: 1669.</li>
+                            <li><strong>Travel Insurance:</strong> While not mandatory for entry into Thailand, comprehensive travel insurance is **highly recommended** for families. Such plans typically cover unexpected medical costs (with minimum coverage often starting at $200,000 USD), emergency medical evacuation and repatriation, trip cancellation or interruption expenses, and loss or damage of baggage and personal effects. Providers like <a href="https://www.lumahealth.com/travel-insurance/thailand/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Luma</a> and <a href="https://www.chubb.com/th-en/personal/travel-insurance.html" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Chubb</a> offer tailored plans that can include coverage for specific risks, such as motorbike accidents.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
+                        Tipping Etiquette 🙏
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <p class="mb-2">Tipping customs in Thailand differ from those in many Western countries. While not as deeply ingrained or mandatory, tipping has become more common and appreciated in tourist-heavy areas like Phuket. It is generally perceived as a gesture of gratitude for good service rather than an obligation.</p>
+                        <ul class="list-disc list-inside mb-4 space-y-1">
+                            <li><strong>Restaurants/Cafes:</strong> At local street food stalls or casual eateries, tipping is generally not expected. In sit-down or upscale restaurants, it is important to check the bill for a 10% service charge, which is often included. If a service charge is already applied, additional tipping is not necessary. If no service charge is included, leaving 5-10% of the bill for exceptional service is appreciated. For street food, rounding up the bill by a few baht (e.g., 10-20 THB) is a thoughtful gesture.</li>
+                            <li><strong>Hotel Staff:</strong> A tip of 20-50 THB per bag is customary for bellboys/porters. Leaving 20-50 THB per day for housekeeping, typically in an envelope or on the bedside table, is a kind way to thank the cleaning staff. If a concierge assists with special requests, such as booking tours or making restaurant reservations, a tip of 50-100 THB is polite.</li>
+                            <li><strong>Tour Guides/Drivers:</strong> For a tour guide, a tip of 300-550 THB per day is appropriate, depending on the group size and the quality of service. For group tours, 100 THB per person is often considered sufficient. It is generally recommended to give a lump sum tip at the end of the tour. For private drivers who provide extended service, a tip of 100-300 THB per day is fair. For shorter taxi rides, rounding up the fare (e.g., to the nearest 10-20 THB) is common. For longer rides (30 minutes or more), considering a tip of 30-50 THB is appropriate.</li>
+                            <li><strong>Massages/Spas:</strong> For excellent service at a massage parlor or spa, a tip of 10-20% of the total treatment cost is considered generous.</li>
+                            <li><strong>General:</strong> Always tip in Thai Baht, preferably using small denominations (20 THB and 50 THB notes). A sincere "Khop khun krub" (for males) or "Khop khun kha" (for females) (thank you) accompanied by a smile goes a long way.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ethical-encounters" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-center text-seafoam-accent">🐘 Ethical Animal Encounters</h2>
+            <p class="section-intro text-center max-w-3xl mx-auto">
+                Engage with Phuket's wildlife responsibly. This section guides you to ethical elephant sanctuaries and the Gibbon Rehabilitation Project, ensuring your experiences support animal welfare and conservation, not exploitation. Learn how to identify truly humane operations.
+            </p>
+
+            <div class="bg-seafoam-accent/10 p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-xl font-semibold mb-3 text-seafoam-accent">Key Ethical Principles for Sanctuaries:</h3>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>✅ No Riding, No Bathing (with humans), No Chaining, No Bull Hooks: These are fundamental indicators of a truly ethical sanctuary. Elephants should not be forced into interactions or performances for human entertainment.</li>
+                    <li>✅ Hands-off Policy: Interactions should primarily be observational, allowing elephants to express their natural behaviors freely. Direct touching should only occur if initiated by the elephant in a non-forced and respectful setting.</li>
+                    <li>✅ Focus on Rescue & Rehabilitation: Ethical sanctuaries prioritize rescuing and providing a safe, natural home for old, injured, or abused elephants, often from logging or tourism industries.</li>
+                    <li>✅ Natural Environment: Elephants should have ample space to roam freely within a natural habitat, such as lush jungle, dotted with ponds and fields.</li>
+                    <li>✅ Visitor Education: Sanctuaries should actively educate visitors on elephant welfare, conservation issues, and the individual stories of their rescued elephants.</li>
+                </ul>
+                <p class="mt-3 text-sm">Do your research! "Ethical" can be misused. Look for these principles.</p>
+            </div>
+            
+            <h3 class="text-2xl font-semibold mb-4 text-warm-neutral-dark">Recommended Ethical Elephant Sanctuaries:</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://www.phuketelephantsanctuary.org/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phuket Elephant Sanctuary (PES)</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> First ethical sanctuary, NatGeo endorsed. Strict no riding/touching. Vet care.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Observation from canopy walkway, feeding, vegetarian meal.</p>
+                    <p class="text-sm"><strong>Cost (Half-Day):</strong> 3000 THB (13+), 1500 THB (4-12). Shared round-trip transfers available.</p>
+                    <p class="text-sm"><strong>Location:</strong> Paklok, 30 acres near Khao Phra Thaeo National Park.</p>
+                </div>
+                <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://bukitelephantpark.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Bukit Elephant Park</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> Strict no riding/bathing. 6 rescued elephants.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Half-Day (3 hr) Elephant Nature Tours, Mini Elephant Nature (2 hr) Tours, "Walk and Feed," and "Walk and Plant" experiences.</p>
+                    <p class="text-sm"><strong>Cost (Half-Day 3hr):</strong> 2700 THB (adult), 1500 THB (4-11).</p>
+                    <p class="text-sm"><strong>Location:</strong> Near Khlong Kata Reservoir.</p>
+                </div>
+                <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://phuketelephantnaturereserve.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phuket Elephant Nature Reserve (PENR)</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> Strong emphasis on visitor education, sustainability, and natural, ethical experiences, with a 100% "no riding, no bathing, and hands-off" policy. Accredited by SGS Thailand, audited by Asian Captive Elephant Standards (ACES).</p>
+                    <p class="text-sm"><strong>Activities:</strong> Interact through feeding, jungle walking to observe elephants. Learn about elephant dung recycling, help prepare herbal treats, nature hikes. Observational mud and spa baths for elephants.</p>
+                    <p class="text-sm"><strong>Cost:</strong> 90-min introductory experience: 1200 THB (adult), 600 THB (4-12). Half-Day Adventure: 3000 THB (adult), 1500 THB (4-12).</p>
+                </div>
+                <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="overnight">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://hiddenforestphuket.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Hidden Forest Elephant Reserve</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> Operates on a "no-touch" basis, ensuring elephants are observed in their natural state.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Primarily observational experiences of elephants grazing, playing in mud, or bathing from Bamboo Observation Huts.</p>
+                    <p class="text-sm"><strong>Cost:</strong> 2900 THB (adult), 1450 THB (4-11). Price includes transportation and a vegetarian Thai buffet meal.</p>
+                </div>
+                 <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://greenelephantsanctuarypark.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Green Elephant Sanctuary Park</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> Provides transportation and a buffet lunch, focusing on observational activities.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Feeding elephants, introduction to the park, mud spa, and washing elephants.</p>
+                    <p class="text-sm"><strong>Cost (Half-Day):</strong> 2500 THB (adult), 1900 THB (5-10).</p>
+                </div>
+                <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://www.elephantretirementparkphuket.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Elephant Retirement Park</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> Offers tours for small groups with a strict "no riding or flash photography" policy and provides free transfers.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Feeding elephants, mud spa, and washing elephants.</p>
+                    <p class="text-sm"><strong>Cost (Half-Day):</strong> 2600 THB (adult), 1800 THB (kids).</p>
+                </div>
+                <div class="bg-warm-neutral-medium p-4 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://elephantjunglesanctuary.com/phuket/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Elephant Jungle Sanctuary Phuket (EJS)</a></h4>
+                    <p class="text-sm"><strong>Ethics:</strong> Offers free transfers from accommodation anywhere in Phuket. Noted as one of the more affordable ethical options.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Feeding, mud spa, and washing elephants.</p>
+                    <p class="text-sm"><strong>Cost:</strong> 2-hour program: 1800 THB (adult), 1350 THB (5-9). Half-day programs: 2600 THB (adult), 1800 THB (kids).</p>
+                </div>
+            </div>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-8" role="alert">
+                <p class="font-bold">Sanctuary to Avoid:</p>
+                <p><strong>Phuket Elephant Sanctuary Village:</strong> This establishment has been explicitly criticized for housing elephants as "props for tourist photos." NOT recommended if ethical treatment and animal welfare are a priority for your family.</p>
+            </div>
+
+            <h3 class="text-2xl font-semibold mb-4 text-warm-neutral-dark">🐒 <a href="https://www.gibbonproject.org/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">The Gibbon Rehabilitation Project</a> (GRP)</h3>
+            <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg">
+                <p class="mb-2"><strong>Mission:</strong> Dedicated to rescuing gibbons, often targeted by the illegal pet trade, and rehabilitating them for reintroduction into their natural habitat. Actively works to combat the practice of killing entire gibbon families to obtain babies for tourism.</p>
+                <p class="mb-2"><strong>Ethical Practices:</strong> Maintains a strict 'hands-off' policy to protect the animals. A genuine conservation effort, working to reintroduce gibbons into the Khao Phra Thaeo Wildlife Sanctuary. Limits visitor numbers to 36 people at a time to minimize contact.</p>
+                <p class="mb-2"><strong>Location:</strong> Situated within the <a href="https://www.hotels.com/go/thailand/gibbon-rehabilitation-project" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Khao Phra Thaeo Wildlife Sanctuary</a>, which is Phuket's last remaining evergreen rainforest.</p>
+                <p class="mb-2"><strong>Activities:</strong> Visitors can support the mission by visiting the education center to learn about these endangered primates. Learning sessions provide insights into the resident gibbons and their rehabilitation process. Longer courses offer opportunities to help prepare food. A ticket to the project also includes access to the national park, allowing visitors to swim at a waterfall or enjoy short walks.</p>
+                <p><strong>Cost:</strong> Entrance to the Gibbon Rehabilitation Project itself is free. However, there is an entry fee of approximately 200 THB for foreigners to enter the Khao Phra Thaeo National Park.</p>
+            </div>
+        </section>
+
+        <section id="island-adventures" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-center text-seafoam-accent">🏝️ Island Hopping Adventures</h2>
+            <p class="section-intro text-center max-w-3xl mx-auto">
+                Explore the stunning islands around Phuket! This section details popular day trips and overnight escapes, including activities, travel times, estimated costs, and suitability for families. Use the filters to find your perfect island adventure.
+            </p>
+            <div class="flex justify-center space-x-4 mb-6">
+                <button class="filter-btn bg-seafoam-accent text-white px-4 py-2 rounded-md hover-bg-seafoam-dark focus:outline-none focus:ring-2 focus:ring-seafoam-accent" data-filter="all">All</button>
+                <button class="filter-btn bg-gray-200 text-warm-neutral-dark px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400" data-filter="day-trip">Day Trips</button>
+                <button class="filter-btn bg-gray-200 text-warm-neutral-dark px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400" data-filter="overnight">Overnight Escapes</button>
+            </div>
+
+            <div id="island-cards-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="day-trip">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://www.qbictravel.com/tour-destination/phi-phi-islands/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phi Phi Islands</a></h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Day Trip</p>
+                    <p class="text-sm"><strong>Activities:</strong> Explore stunning limestone cliffs, snorkel in vibrant coral reefs at locations like Maya Bay, Pileh Lagoon, and Loh Samah Bay. Relax on picturesque white-sand beaches such as Bamboo Island and Monkey Beach, and visit the intriguing Viking Cave.</p>
+                    <p class="text-sm"><strong>Travel:</strong> Full-day tours from Phuket typically range from 7 to 12 hours. Speedboat transfers from Phuket usually take approximately 1.5 to 2 hours.</p>
+                    <p class="text-sm"><strong>Cost (Family of 4):</strong> Speedboat tours generally start from 1,300 THB per person. For a family of 4 (2 adults, 2 children aged 4-12, children's tickets often around 900 THB), the approximate cost could be 4,400 THB. Viator lists per-adult costs ranging from $54 to $88.</p>
+                    <p class="text-sm"><strong>Suitability:</strong> Can be crowded. <a href="https://simbaseatrips.com/family-boat-tours-of-phuket/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Simba Sea Trips</a> offers family-friendly tours designed to navigate crowds. Staying overnight on Phi Phi is suggested for a more serene experience. Best time to visit: November to March.</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="day-trip">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://www.getyourguide.com/phang-nga-bay-l89073/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phang Nga Bay & James Bond Island</a></h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Day Trip</p>
+                    <p class="text-sm"><strong>Activities:</strong> Explore magnificent limestone formations, sea canoeing through caves and around islands, visiting the iconic <a href="https://www.theenvironmentalblog.org/2024/10/james-bond-island-phang-nga-bay-thailand/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">James Bond Island (Khao Phing Kan)</a>, and the unique floating Panyee village. Some tours include visits to Samet Nangshe Viewpoint and Suwankhuha (Monkey Temple).</p>
+                    <p class="text-sm"><strong>Travel:</strong> Day trips typically range from 7 to 10 hours.</p>
+                    <p class="text-sm"><strong>Cost (Family of 4):</strong> Tours like "Amazing Phang Nga" are priced around 1,700 THB per adult and 1,200 THB per child (4-9 years old). For a family of 4, the approximate cost would be 5,800 THB. Viator lists per-person costs from $43 to $147.</p>
+                    <p class="text-sm"><strong>Suitability:</strong> <a href="https://simbaseatrips.com/family-boat-tours-of-phuket/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Simba Sea Trips</a> offers tours with a gentle pace, shaded areas on boats, and life jackets, making them suitable for families. Remains a good option even during the monsoon season; scenery can be "even more impressive with big clouds".</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="day-trip">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://citytourphuket.com/3-khai-island-phuket/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">The Khai Islands</a></h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Day Trip</p>
+                    <p class="text-sm"><strong>Activities:</strong> Ideal for snorkeling, swimming, and relaxing on pristine white sandy beaches. Khai Nai is famously known as "Cat Island" due to its resident feline population. Full-day tours may include a stop at Maiton Island.</p>
+                    <p class="text-sm"><strong>Travel:</strong> Just a short 15-20 minute speedboat ride from Phuket. Both half-day (4 hours) and full-day (8 hours) tour options are available.</p>
+                    <p class="text-sm"><strong>Cost (Family of 4, Half-Day):</strong> Half-day tours typically around 890 THB per adult and 650 THB per child (4-11 years old). For a family of 4, a half-day tour costs approximately 3,080 THB. Prices usually include fees, guide, fruits, drinks, cat treats, life jackets, snorkeling equipment, and transport.</p>
+                    <p class="text-sm"><strong>Suitability:</strong> Excellent for families with young children, first-time snorkelers, non-swimmers, and elderly travelers due to short boat rides and shallow, safe waters. Not recommended for pregnant women or children under 1 year old.</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="day-trip">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://5starmarinephuket.com/2025/04/10/maiton-coral-island-best-phuket-multi-generational-family-tour/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Coral Island (Koh Hey)</a></h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Day Trip</p>
+                    <p class="text-sm"><strong>Activities:</strong> Mix of relaxation on white sandy beaches and vibrant snorkeling. Optional water activities include parasailing, sea walking, scuba diving, kayaking, and banana boat rides.</p>
+                    <p class="text-sm"><strong>Travel:</strong> Just 30 minutes from Phuket by speedboat. Tours typically last 6-7 hours.</p>
+                    <p class="text-sm"><strong>Cost (Family of 4):</strong> Tours generally start from $69 USD per person. For a family of 4, approximately $276 USD. Price usually includes lunch, drinks, fruit, towel, beach chair, life jackets, masks/snorkels, guide, and accident insurance.</p>
+                    <p class="text-sm"><strong>Suitability:</strong> Considered excellent for multi-generational families due to shallow, safe waters and short travel time. Specific age restrictions apply for certain water activities. Not recommended for pregnant women or individuals with certain health conditions.</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="overnight">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://phuketsailtours.com/discover-koh-racha-yai/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Racha Islands</a> (Racha Yai & Racha Noi)</h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Overnight Escape</p>
+                    <p class="text-sm"><strong>Stay:</strong> 1-2 nights ideal to fully experience tranquility after day-trippers depart.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Excellent snorkeling and diving opportunities, with rich coral reefs and diverse marine life. Top spot for stargazing due to minimal light pollution.</p>
+                    <p class="text-sm"><strong>Accommodation:</strong> Options range from luxurious resorts like <a href="https://www.agoda.com/the-racha/hotel/phuket-th.html" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">The Racha</a> (average $538 USD/night) to more budget-friendly choices such as <a href="https://www.agoda.com/ban-raya-resort-and-spa/hotel/phuket-th.html" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Ban Raya Resort and Spa</a> (average $63 USD/night) and <a href="https://www.agoda.com/racha-island-resort/hotel/phuket-th.html" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Racha Island Resort</a> (average $114 USD/night). Resorts often offer family amenities like kids' clubs, playgrounds, and babysitting.</p>
+                    <p class="text-sm"><strong>Transport:</strong> <a href="https://www.agoda.com/racha-island-resort/hotel/phuket-th.html" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Racha Island Resort</a> offers a daily complimentary boat transfer service for guests from Chalong Pier. Private longtail boats (~4000 THB/way) and private speedboats (~20000 THB/way) are also available. Best time to visit: November to April.</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="overnight">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://www.khaosokecoresort.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Khao Sok National Park</a></h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Overnight Escape</p>
+                    <p class="text-sm"><strong>Stay:</strong> About a 3-hour drive north of Phuket. While day trips are possible, an overnight stay is highly recommended. Packages for 3 days/2 nights or 4 days/3 nights are available.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Rafting or tubing on the Sok River, exploring the vast Ratchaprapha Lake by longtail boat, and venturing into caves. Resorts often arrange night safaris, immersive nature hikes, and cooking classes. Some ethical elephant programs (observational, no riding) may be nearby.</p>
+                    <p class="text-sm"><strong>Accommodation:</strong> Resorts like <a href="https://www.khaosokecoresort.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Our Jungle Camp</a> and <a href="https://www.khaosokaccommodation.com/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Our Jungle House</a> offer unique accommodations such as wooden treehouses, bungalows, and earth houses. Family packages are designed for nature-loving families.</p>
+                    <p class="text-sm"><strong>Transport:</strong> Private transfers from Phuket can be organized directly through the resorts.</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="overnight">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://www.santhiya.com/kohyaoyai/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Koh Yao Yai</a></h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Overnight Escape</p>
+                    <p class="text-sm"><strong>Stay:</strong> A serene island in Phang Nga Bay, offers a tranquil escape with magnificent views towards the Krabi coastline. While day trips are possible, an overnight stay is considered superior for a more immersive experience.</p>
+                    <p class="text-sm"><strong>Activities:</strong> Ideal for relaxing and enjoying its peaceful atmosphere. Tours often include stops at nearby Hong Island.</p>
+                    <p class="text-sm"><strong>Accommodation:</strong> Resorts like <a href="https://www.santhiya.com/kohyaoyai/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Santhiya Koh Yao Yai Resort & Spa</a> offer private piers and transfer services.</p>
+                    <p class="text-sm"><strong>Transport:</strong> Access is typically by boat from Bang Rong pier on the northeast coast of Phuket. Santhiya offers shuttle vans from Phuket International Airport connecting to a speedboat transfer to the resort's private pier. Private speedboats (from 10,000 THB) and luxury vans (from 1,800 THB) are available for transfers.</p>
+                </div>
+                <div class="island-card bg-warm-neutral-medium p-4 rounded-lg shadow-lg" data-type="day-trip">
+                    <h4 class="font-bold text-lg text-seafoam-accent"><a href="https://sawasdeephuket.com/similan-islands-day-trip-with-sawasdee" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Similan Islands</a> (Seasonal)</h4>
+                    <p class="text-xs mb-1 uppercase tracking-wider text-gray-500">Day Trip (Caveat)</p>
+                    <p class="text-sm"><strong>Activities:</strong> Globally renowned for pristine coral reefs and clear waters. Over 500 species of hard and soft corals, excellent visibility for snorkeling/diving. Spot turtles, Moray eels, and occasionally whale sharks. White sandy beaches and unique rock formations.</p>
+                    <p class="text-sm"><strong>Seasonality:</strong> Protected national park, open **only from October 15th to May 15th**. Best time: January to March for calm seas and sunny weather. October and November are not recommended due to potentially rough seas.</p>
+                    <p class="text-sm"><strong>Travel:</strong> Trip from Phuket takes approximately 2 hours by speedboat across open sea.</p>
+                    <p class="text-sm"><strong>Suitability:</strong> Due to the long speedboat trip across open sea, this tour is **not recommended for anyone with young children** or those not accustomed to long speedboat tours.</p>
+                    <p class="text-sm"><strong>Sustainability:</strong> Visitor numbers managed by national park authorities to ensure ecosystems remain intact.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="summary" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold mb-6 text-center text-seafoam-accent">📋 Conclusions & Recommendations</h2>
+            <p class="section-intro text-center max-w-3xl mx-auto">
+                Phuket offers a fantastic blend of adventure, relaxation, and culture for families prioritizing ethical tourism. By planning carefully, choosing responsible operators, and respecting local customs, you can create an unforgettable and meaningful vacation in this beautiful part of Thailand.
+            </p>
+            <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg">
+                <p class="mb-3">Kamala Beach is an excellent family base. Consider seasons: dry season guarantees ideal weather but comes with higher costs and larger crowds, while the monsoon season offers budget advantages but requires flexibility. Phang Nga Bay maintains its appeal even during the rainy season.</p>
+                <p class="mb-3">Prioritize safe transport (ride-hailing apps, car rentals) and avoid scooter rentals for families due to substantial risks. Phuket's robust digital infrastructure ensures continuous connectivity. Proactive financial planning, including informing banks and understanding currency conversion, is essential.</p>
+                <p class="mb-3">Pack smart for varied weather and activities. Emphasize health and safety (beach safety, traffic caution, food hygiene). Secure comprehensive travel insurance as a critical safeguard. Embracing local tipping customs fosters positive interactions.</p>
+                <p class="font-semibold">For ethical animal encounters, select sanctuaries that genuinely prioritize animal welfare, such as the <a href="https://www.phuketelephantsanctuary.org/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Phuket Elephant Sanctuary</a> or the <a href="https://www.gibbonproject.org/" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Gibbon Rehabilitation Project</a>. These adhere to strict no-riding, no-bathing, and hands-off policies.</p>
+                <p class="mt-4">Enjoy your responsible adventure in Phuket!</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-warm-neutral-medium text-warm-neutral-dark text-center py-6 mt-12">
+        <p>&copy; 2025 Phuket Ethical Family Guide SPA. Information based on the "Phuket Unveiled" guide.</p>
+        <a href="#" class="text-seafoam-accent hover:underline">Back to Top &uarr;</a>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.style.display = 'none'; 
+
+            mobileMenuButton.addEventListener('click', () => {
+                const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true' || false;
+                mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+                mobileMenu.style.display = isExpanded ? 'none' : 'block';
+                mobileMenuButton.querySelectorAll('svg').forEach(svg => svg.classList.toggle('hidden'));
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (mobileMenu.style.display === 'block') {
+                         mobileMenuButton.click(); 
+                    }
+                    navLinks.forEach(nav => nav.classList.remove('active-nav'));
+                    this.classList.add('active-nav');
+                });
+            });
+            
+            function updateActiveNavOnScroll() {
+                let currentSection = '';
+                const sections = document.querySelectorAll('main section');
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100; 
+                    if (window.scrollY >= sectionTop) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    if (link.getAttribute('href') === `#${currentSection}`) {
+                        link.classList.add('active-nav');
+                    }
+                });
+            }
+            window.addEventListener('scroll', updateActiveNavOnScroll);
+            updateActiveNavOnScroll();
+
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const button = item.querySelector('.accordion-button');
+                const arrow = button.querySelector('.arrow');
+                button.addEventListener('click', () => {
+                    const isOpen = button.classList.toggle('open');
+                    arrow.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+                });
+            });
+
+            const seasonsChartCtx = document.getElementById('seasonsChart')?.getContext('2d');
+            if (seasonsChartCtx) {
+                new Chart(seasonsChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Dry Season (Nov-Apr)', 'Monsoon Season (May-Oct)'],
+                        datasets: [
+                            {
+                                label: 'Popularity/Crowds',
+                                data: [5, 2],
+                                backgroundColor: 'rgba(92, 169, 167, 0.6)', 
+                                borderColor: 'rgba(92, 169, 167, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Weather Predictability',
+                                data: [5, 3],
+                                backgroundColor: 'rgba(244, 236, 226, 0.8)',
+                                borderColor: 'rgba(244, 236, 226, 1)',
+                                borderWidth: 1
+                            },
+                             {
+                                label: 'Cost Level',
+                                data: [4, 2],
+                                backgroundColor: 'rgba(160, 210, 219, 0.6)',
+                                borderColor: 'rgba(160, 210, 219, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    color: '#5c554d' 
+                                },
+                                grid: { color: 'rgba(92, 85, 77, 0.1)'}
+                            },
+                            x: {
+                                ticks: { color: '#5c554d' },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#5c554d' } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y + ' (1=Low, 5=High)';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const islandCards = document.querySelectorAll('.island-card');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filter = button.getAttribute('data-filter');
+                    
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-seafoam-accent', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-warm-neutral-dark', 'hover:bg-gray-300');
+                    });
+                    button.classList.add('bg-seafoam-accent', 'text-white');
+                    button.classList.remove('bg-gray-200', 'text-warm-neutral-dark', 'hover:bg-gray-300');
+
+                    islandCards.forEach(card => {
+                        if (filter === 'all' || card.getAttribute('data-type') === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            let thbToAedRate = null;
+            let exchangeRateFetched = false;
+            const currencyConverterAccordionButton = document.getElementById('currency-converter-accordion-button'); // New ID
+            const converterLoading = document.getElementById('converter-loading');
+            const converterError = document.getElementById('converter-error');
+            const converterContent = document.getElementById('converter-content');
+            const thbInput = document.getElementById('input-currency'); // Changed ID
+            const aedOutput = document.getElementById('output-currency'); // Changed ID
+            const thbAedRateDisplay = document.getElementById('thb-aed-rate');
+            const standardConversionsTableBody = document.getElementById('standard-conversions-table-body');
+
+            const standardThbAmounts = [10, 50, 100, 250, 500, 1000];
+
+            async function fetchExchangeRates() {
+                converterLoading.classList.remove('hidden');
+                converterError.classList.add('hidden');
+                converterContent.classList.add('hidden');
+
+                try {
+                    const response = await fetch('https://v6.exchangerate-api.com/v6/87fcdc03339e13c185720c28/latest/THB');
+                    const data = await response.json();
+
+                    if (data.result === 'success' && data.conversion_rates && data.conversion_rates.AED) {
+                        thbToAedRate = data.conversion_rates.AED; 
+                        thbAedRateDisplay.textContent = thbToAedRate.toFixed(4);
+                        populateStandardConversions();
+                        converterContent.classList.remove('hidden');
+                    } else {
+                        converterError.classList.remove('hidden');
+                        console.error('API response error:', data);
+                    }
+                } catch (error) {
+                    converterError.classList.remove('hidden');
+                    console.error('Error fetching exchange rates:', error);
+                } finally {
+                    converterLoading.classList.add('hidden');
+                }
+            }
+
+            function convertThbToAed() {
+                if (thbToAedRate === null) {
+                    aedOutput.textContent = 'N/A';
+                    return;
+                }
+                const thbAmount = parseFloat(thbInput.value);
+                if (!isNaN(thbAmount)) {
+                    aedOutput.textContent = (thbAmount * thbToAedRate).toFixed(2) + ' AED';
+                } else {
+                    aedOutput.textContent = '0.00 AED';
+                }
+            }
+
+            function populateStandardConversions() {
+                if (thbToAedRate === null) {
+                    standardConversionsTableBody.innerHTML = '<tr><td colspan="2" class="py-2 px-4 text-center">Rates not available</td></tr>';
+                    return;
+                }
+                standardConversionsTableBody.innerHTML = ''; 
+                standardThbAmounts.forEach(amount => {
+                    const aedEquivalent = (amount * thbToAedRate).toFixed(2);
+                    const row = `
+                        <tr>
+                            <td class="py-2 px-4 border-b border-gray-200 text-sm">${amount} THB</td>
+                            <td class="py-2 px-4 border-b border-gray-200 text-sm">${aedEquivalent} AED</td>
+                        </tr>
+                    `;
+                    standardConversionsTableBody.innerHTML += row;
+                });
+            }
+
+            currencyConverterAccordionButton.addEventListener('click', () => { // New event listener target
+                const isOpen = currencyConverterAccordionButton.classList.contains('open');
+                if (isOpen && !exchangeRateFetched) {
+                    fetchExchangeRates();
+                    exchangeRateFetched = true;
+                }
+            });
+
+            thbInput.addEventListener('input', convertThbToAed);
+        });
+    </script>
+</body>
+</html>
