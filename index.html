@@ -12,6 +12,7 @@
         - Elephant Sanctuaries: Report Info (Names, ethical practices, activities, costs) -> Goal (Inform & Compare ethical options) -> Viz (Cards with key details, "Key Ethical Principles" list) -> Interaction (Static cards) -> Justification (Easy comparison, highlights ethics) -> Method (HTML/Tailwind).
         - Island Trips: Report Info (Names, activities, travel time, cost, suitability) -> Goal (Explore options) -> Viz (Filterable Cards for Day/Overnight) -> Interaction (Buttons to filter, static cards) -> Justification (Easy browsing of many options) -> Method (HTML/Tailwind, JS for filtering).
         - Currency Converter: Report Info (THB to AED conversion, standard amounts) -> Goal (Provide live conversion and quick reference) -> Viz (Input field, display, table) -> Interaction (Live input conversion, API fetch) -> Justification (Practical tool for financial planning) -> Library (Vanilla JS, Fetch API).
+        - Personalized Trip Idea (LLM): Report Info (Guide content on ethical encounters & islands) -> Goal (Generate tailored suggestions) -> Viz (Text input, button, text output) -> Interaction (User input, LLM API call) -> Justification (Enhances planning with AI-driven personalization) -> Library (Vanilla JS, Gemini API).
         - NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
@@ -130,6 +131,26 @@
                     </div>
                 </div>
                 <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
+                    <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center" id="trip-idea-generator-button">
+                        ✨ Personalized Trip Idea ✨
+                        <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
+                    </button>
+                    <div class="accordion-content mt-4">
+                        <p class="mb-4">Tell us your family's interests (e.g., "adventure, relaxing, food, animals") and get a personalized ethical trip idea based on this guide!</p>
+                        <textarea id="interests-input" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-seafoam-accent mb-4" rows="3" placeholder="e.g., adventurous, love animals, prefer quiet beaches"></textarea>
+                        <button id="generate-idea-btn" class="bg-seafoam-accent text-white px-4 py-2 rounded-md hover-bg-seafoam-dark focus:outline-none focus:ring-2 focus:ring-seafoam-accent flex items-center justify-center">
+                            Generate Idea
+                            <span id="idea-spinner" class="spinner ml-2 hidden"></span>
+                        </button>
+                        <div id="generated-idea-output" class="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200 hidden">
+                            <p class="text-sm text-gray-600">Your personalized idea will appear here.</p>
+                        </div>
+                        <div id="idea-error" class="text-red-500 text-center mt-4 hidden">
+                            Sorry, I couldn't generate an idea right now. Please try again or rephrase your interests.
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
                     <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
                         Best Time to Visit ☀️🌧️
                         <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
@@ -150,7 +171,7 @@
 
                 <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
                     <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
-                        Getting Around Phuket 🚕🚌
+                        Getting Around Phuket �🚌
                         <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
                     </button>
                     <div class="accordion-content mt-4">
@@ -682,7 +703,84 @@
             });
 
             thbInput.addEventListener('input', convertThbToAed);
+
+
+            // LLM Feature Logic
+            const tripIdeaGeneratorButton = document.getElementById('trip-idea-generator-button');
+            const interestsInput = document.getElementById('interests-input');
+            const generateIdeaBtn = document.getElementById('generate-idea-btn');
+            const ideaSpinner = document.getElementById('idea-spinner');
+            const generatedIdeaOutput = document.getElementById('generated-idea-output');
+            const ideaError = document.getElementById('idea-error');
+
+            const guideContentSummary = `
+                Ethical Elephant Sanctuaries: Phuket Elephant Sanctuary (PES - no riding/touching, observation, vet care), Bukit Elephant Park (no riding/bathing), Phuket Elephant Nature Reserve (PENR - no riding/bathing/hands-off, education), Hidden Forest Elephant Reserve (no-touch, observation), Green Elephant Sanctuary Park (observation, mud spa, washing), Elephant Retirement Park (no riding/flash, mud spa, washing), Elephant Jungle Sanctuary (EJS - mud spa, washing). Avoid: Phuket Elephant Sanctuary Village (uses elephants as props).
+                Gibbon Rehabilitation Project (GRP): Rescues gibbons from illegal pet trade, rehabilitates for reintroduction. Strict hands-off policy, genuine conservation, education.
+                Island Hopping Adventures:
+                Phi Phi Islands: Iconic beauty, snorkeling (Maya Bay, Pileh Lagoon), beaches. Can be crowded, consider overnight for serenity. Best Nov-Mar.
+                Phang Nga Bay & James Bond Island: Limestone karsts, sea canoeing, floating Panyee village. Good even in monsoon.
+                Khai Islands: Shallow waters, good for young children/beginners, short speedboat ride. "Cat Island".
+                Coral Island (Koh Hey): Beaches, snorkeling, optional water sports. Good for multi-generational families.
+                Overnight Escapes:
+                Racha Islands: Tranquil, pristine beaches, excellent snorkeling/diving, stargazing. Resorts with family amenities.
+                Khao Sok National Park: Ancient rainforests, Cheow Lan Lake, rafting, caves, night safaris, nature hikes. Treehouses, bungalows.
+                Koh Yao Yai: Serene island, quiet charm, stunning views. Relaxation, tours to nearby islands.
+            `;
+
+            generateIdeaBtn.addEventListener('click', async () => {
+                const userInterests = interestsInput.value.trim();
+                if (!userInterests) {
+                    alert('Please enter your family interests to get a trip idea!');
+                    return;
+                }
+
+                generatedIdeaOutput.classList.add('hidden');
+                ideaError.classList.add('hidden');
+                ideaSpinner.classList.remove('hidden');
+                generateIdeaBtn.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    const prompt = `You are an expert travel agent specializing in ethical family trips to Phuket. Here's a summary of ethical activities and island destinations in Phuket from a travel guide:
+
+${guideContentSummary}
+
+Based on the above information and the following family interests, generate a personalized day trip or activity idea for a family. Focus on ethical animal encounters and family-friendly activities mentioned in the guide. Provide a brief description, suggested activities, and why it fits the interests. Keep it concise, around 100-150 words.
+
+Family interests: ${userInterests}`;
+
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        generatedIdeaOutput.innerHTML = `<p class="font-semibold mb-2">Your Personalized Trip Idea:</p><p>${text}</p>`;
+                        generatedIdeaOutput.classList.remove('hidden');
+                    } else {
+                        ideaError.classList.remove('hidden');
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    ideaError.classList.remove('hidden');
+                    console.error('Error calling Gemini API:', error);
+                } finally {
+                    ideaSpinner.classList.add('hidden');
+                    generateIdeaBtn.disabled = false;
+                }
+            });
         });
     </script>
 </body>
 </html>
+�
