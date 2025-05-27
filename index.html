@@ -6,14 +6,6 @@
     <title>Phuket Unveiled: Ethical Family Guide</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Visualization & Content Choices: 
-        - Seasons: Report Info (Dry vs Monsoon characteristics, costs, crowds) -> Goal (Compare seasons) -> Viz (Bar Chart - Chart.js: Popularity/Crowds, Weather Predictability, Cost Level) -> Interaction (Static display) -> Justification (Quick visual summary of trade-offs) -> Library (Chart.js).
-        - Transport Costs: Report Info (Taxi, Bolt, Bus costs for various routes) -> Goal (Compare options) -> Viz (Styled HTML Table/List) -> Interaction (Static display) -> Justification (Clear cost breakdown) -> Method (HTML/Tailwind).
-        - Elephant Sanctuaries: Report Info (Names, ethical practices, activities, costs) -> Goal (Inform & Compare ethical options) -> Viz (Cards with key details, "Key Ethical Principles" list) -> Interaction (Static cards) -> Justification (Easy comparison, highlights ethics) -> Method (HTML/Tailwind).
-        - Island Trips: Report Info (Names, activities, travel time, cost, suitability) -> Goal (Explore options) -> Viz (Filterable Cards for Day/Overnight) -> Interaction (Buttons to filter, static cards) -> Justification (Easy browsing of many options) -> Method (HTML/Tailwind, JS for filtering).
-        - Currency Converter: Report Info (THB to AED conversion, standard amounts) -> Goal (Provide live conversion and quick reference) -> Viz (Input field, display, table) -> Interaction (Live input conversion, API fetch) -> Justification (Practical tool for financial planning) -> Library (Vanilla JS, Fetch API).
-        - Personalized Trip Idea (LLM): Report Info (Guide content on ethical encounters & islands) -> Goal (Generate tailored suggestions) -> Viz (Text input, button, text output) -> Interaction (User input, LLM API call) -> Justification (Enhances planning with AI-driven personalization) -> Library (Vanilla JS, Gemini API).
-        - NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .bg-warm-neutral-light { background-color: #fdfaf6; }
@@ -171,7 +163,7 @@
 
                 <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
                     <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
-                        Getting Around Phuket �🚌
+                        Getting Around Phuket 🚕🚌
                         <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
                     </button>
                     <div class="accordion-content mt-4">
@@ -218,7 +210,7 @@
 
                 <div class="bg-warm-neutral-medium p-6 rounded-lg shadow-lg accordion-item">
                     <button class="accordion-button w-full text-left text-xl font-semibold text-warm-neutral-dark flex justify-between items-center">
-                        Managing Finances 💰💳
+                        Managing Finances �💳
                         <span class="arrow text-seafoam-accent text-2xl transform transition-transform duration-300">&#x25BC;</span>
                     </button>
                     <div class="accordion-content mt-4">
@@ -374,7 +366,6 @@
                 <p class="mb-2"><strong>Mission:</strong> Dedicated to rescuing gibbons, often targeted by the illegal pet trade, and rehabilitating them for reintroduction into their natural habitat. Actively works to combat the practice of killing entire gibbon families to obtain babies for tourism.</p>
                 <p class="mb-2"><strong>Ethical Practices:</strong> Maintains a strict 'hands-off' policy to protect the animals. A genuine conservation effort, working to reintroduce gibbons into the Khao Phra Thaeo Wildlife Sanctuary. Limits visitor numbers to 36 people at a time to minimize contact.</p>
                 <p class="mb-2"><strong>Location:</strong> Situated within the <a href="https://www.hotels.com/go/thailand/gibbon-rehabilitation-project" target="_blank" rel="noopener noreferrer" class="text-seafoam-accent hover:underline">Khao Phra Thaeo Wildlife Sanctuary</a>, which is Phuket's last remaining evergreen rainforest.</p>
-                <p class="mb-2"><strong>Activities:</strong> Visitors can support the mission by visiting the education center to learn about these endangered primates. Learning sessions provide insights into the resident gibbons and their rehabilitation process. Longer courses offer opportunities to help prepare food. A ticket to the project also includes access to the national park, allowing visitors to swim at a waterfall or enjoy short walks.</p>
                 <p><strong>Cost:</strong> Entrance to the Gibbon Rehabilitation Project itself is free. However, there is an entry fee of approximately 200 THB for foreigners to enter the Khao Phra Thaeo National Park.</p>
             </div>
         </section>
@@ -713,13 +704,17 @@
             const generatedIdeaOutput = document.getElementById('generated-idea-output');
             const ideaError = document.getElementById('idea-error');
 
+            // --- Gemini API Key (YOUR KEY HERE - KEEP PRIVATE) ---
+            const apiKey = "AIzaSyATju3VBl60EAMq1KaDlrlEoSUbfw-Tw38"; 
+            // --- END Gemini API Key ---
+
             const guideContentSummary = `
                 Ethical Elephant Sanctuaries: Phuket Elephant Sanctuary (PES - no riding/touching, observation, vet care), Bukit Elephant Park (no riding/bathing), Phuket Elephant Nature Reserve (PENR - no riding/bathing/hands-off, education), Hidden Forest Elephant Reserve (no-touch, observation), Green Elephant Sanctuary Park (observation, mud spa, washing), Elephant Retirement Park (no riding/flash, mud spa, washing), Elephant Jungle Sanctuary (EJS - mud spa, washing). Avoid: Phuket Elephant Sanctuary Village (uses elephants as props).
                 Gibbon Rehabilitation Project (GRP): Rescues gibbons from illegal pet trade, rehabilitates for reintroduction. Strict hands-off policy, genuine conservation, education.
                 Island Hopping Adventures:
                 Phi Phi Islands: Iconic beauty, snorkeling (Maya Bay, Pileh Lagoon), beaches. Can be crowded, consider overnight for serenity. Best Nov-Mar.
                 Phang Nga Bay & James Bond Island: Limestone karsts, sea canoeing, floating Panyee village. Good even in monsoon.
-                Khai Islands: Shallow waters, good for young children/beginners, short speedboat ride. "Cat Island".
+                Khai Islands: Shallow waters, good for young kids/beginners, short speedboat ride. "Cat Island".
                 Coral Island (Koh Hey): Beaches, snorkeling, optional water sports. Good for multi-generational families.
                 Overnight Escapes:
                 Racha Islands: Tranquil, pristine beaches, excellent snorkeling/diving, stargazing. Resorts with family amenities.
@@ -751,7 +746,7 @@ Family interests: ${userInterests}`;
 
                     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
                     const payload = { contents: chatHistory };
-                    const apiKey = ""; 
+                    
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                     
                     const response = await fetch(apiUrl, {
@@ -783,4 +778,3 @@ Family interests: ${userInterests}`;
     </script>
 </body>
 </html>
-�
